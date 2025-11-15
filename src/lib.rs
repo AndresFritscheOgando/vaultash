@@ -4,6 +4,6 @@
 #![allow(clippy::cognitive_complexity)]
 
 pub mod api;
-pub mod application;
-pub mod domain;
-pub mod infrastructure;
+pub mod models;
+pub mod repositories;
+pub mod services;
