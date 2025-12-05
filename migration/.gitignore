@@ -1,0 +1,9 @@
+# Ignore build artifacts for migration
+/target/
+/*.lock
+*.pdb
+*.exe
+*.timestamp
+*.json
+
+.env

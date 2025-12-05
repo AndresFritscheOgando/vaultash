@@ -1,0 +1,18 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:18
+    container_name: vaultash-container
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: vaultash-admin
+      POSTGRES_PASSWORD: vaultash12345
+      POSTGRES_DB: vaultash-db
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql
+
+volumes:
+  postgres_data:

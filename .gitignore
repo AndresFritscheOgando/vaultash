@@ -1,0 +1,12 @@
+# Rust
+/target/
+**/*.rs.bk
+**/*.exe
+**/*.pdb
+**/*.timestamp
+**/*.json
+Cargo.lock
+
+# VSCode
+.vscode/
+.env
