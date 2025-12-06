@@ -1,64 +1,128 @@
-
-
+use crate::models::entities::vault::{self, Entity as Vault};
 use crate::models::dtos::vault::VaultInputDto;
-use crate::models::entities::vault::Entity as Vault;
-use crate::models::entities::vault;
+
 use crate::db::conn::get_db;
-use axum::response::{IntoResponse, Json};
-use sea_orm_migration::prelude::prelude::Utc;
+use axum::extract::Path;
+use chrono::Utc;
 
-use axum::http::StatusCode;
+use axum::{
+    response::{IntoResponse, Json},
+    http::StatusCode,
+};
+
+use sea_orm::{ActiveModelTrait, EntityTrait, Set};
+
+
 use uuid::Uuid;
+use serde_json::json;
+
 use crate::utils::index::generate_password;
-use std::env;
-use sea_orm::{ActiveModelTrait, Database, DatabaseConnection, EntityTrait, Set, };
-use serde_json::{json};
 
 
 
-
+// -------------------------------------------------
+// GET ALL
+// -------------------------------------------------
 pub async fn get_all_async() -> impl IntoResponse {
-    // Query get all
-
-    let vaults = match Vault::find().all(get_db()).await {
-        Ok(passwords) => Json(json!({ "data": passwords })).into_response(),
-        Err(_) => (StatusCode::INTERNAL_SERVER_ERROR, "No Vault has been found").into_response()
-    };
-    vaults
+    match Vault::find().all(get_db()).await {
+        Ok(vaults) => Json(json!({ "data": vaults })).into_response(),
+        Err(_) => (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            "No vaults found",
+        )
+            .into_response(),
+    }
 }
 
 
 
+// -------------------------------------------------
+// CREATE
+// -------------------------------------------------
 pub async fn create_async(
-    Json(vault): Json<VaultInputDto>
-) -> impl IntoResponse{
+    Json(input): Json<VaultInputDto>,
+) -> impl IntoResponse {
+    let db = get_db();
 
-    let conn_string = match env::var("DATABASE_URL") {
-        Ok(url) => url,
-        Err(_) => return (StatusCode::INTERNAL_SERVER_ERROR, "DATABASE_URL not set").into_response()
-    };
-
-    let db: DatabaseConnection = match Database::connect(&conn_string).await {
-        Ok(conn) => conn,
-        Err(_) => return (StatusCode::INTERNAL_SERVER_ERROR, "Failed to connect to database").into_response()
-    };
-
-
-    // Call the shared password generator function
+    // Generate password
     let password_json = generate_password().await;
-    let password = password_json.0["password"].as_str().unwrap_or("").to_string();
+    let password = password_json.0["password"]
+        .as_str()
+        .unwrap_or("")
+        .to_string();
 
-    let vault = vault::ActiveModel {
+    // Build ActiveModel
+    let new_vault = vault::ActiveModel {
         id: Set(Uuid::new_v4()),
-        service_name: Set(vault.service_name),
+        service_name: Set(input.service_name),
         service_password: Set(password),
-        service_user_name: Set(vault.service_user_name),
+        service_user_name: Set(input.service_user_name),
         created_at: Set(Utc::now()),
-        updated_at: Set(Utc::now())
+        updated_at: Set(Utc::now()),
     };
 
-    match vault.insert(&db).await {
-        Ok(vault) => (StatusCode::CREATED, Json(json!({ "data": vault }))).into_response(),
-        Err(e) => (StatusCode::INTERNAL_SERVER_ERROR, format!("Failed to create vault: {}", e)).into_response()
+    // Insert
+    match new_vault.insert(db).await {
+        Ok(v) => (StatusCode::CREATED, Json(json!({ "data": v }))).into_response(),
+        Err(e) => (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            format!("Failed to create vault: {}", e),
+        )
+            .into_response(),
     }
+}
+
+
+
+// -------------------------------------------------
+// UPDATE
+// -------------------------------------------------
+// Make sure to import Path and Json
+
+pub async fn update_async(
+    // 1. Path must be FIRST (non-body extractor)
+    Path(id): Path<Uuid>, 
+    // 2. Json must be LAST (body extractor)
+    Json(model_data): Json<VaultInputDto>, // <-- Using the DTO
+) -> impl IntoResponse {
+    let db = get_db();
+
+    // 1. Find existing vault (using 'id' from the path)
+    let existing = match Vault::find_by_id(id).one(db).await {
+        Ok(Some(v)) => v,
+        Ok(None) => {
+            return (
+                StatusCode::NOT_FOUND,
+                "Vault not found",
+            ).into_response();
+        }
+        Err(e) => {
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("Database error: {}", e),
+            ).into_response();
+        }
+    };
+
+    // 2. Convert Model -> ActiveModel
+    let mut active: vault::ActiveModel = existing.into();
+
+    // 3. Update fields (using 'model_data' from the body)
+    active.service_name = Set(model_data.service_name.clone());
+    active.service_user_name = Set(model_data.service_user_name.clone());
+    active.updated_at = Set(Utc::now());
+
+    // 4. Save
+    let updated = match active.update(db).await {
+        Ok(v) => v,
+        Err(e) => {
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("Failed to update vault: {}", e),
+            ).into_response();
+        }
+    };
+
+    // 5. Return result
+    (StatusCode::OK, Json(json!({ "data": updated }))).into_response()
 }
