@@ -1,3 +1,4 @@
+use crate::db::init_db;
 use crate::models::entities::vault::{self, Entity as Vault};
 use crate::models::dtos::vault::VaultInputDto;
 
@@ -63,7 +64,7 @@ pub async fn create_async(
 
     // Insert
     match new_vault.insert(db).await {
-        Ok(v) => (StatusCode::CREATED, Json(json!({ "data": v }))).into_response(),
+        Ok(vault) => (StatusCode::CREATED, Json(json!({ "data": vault }))).into_response(),
         Err(e) => (
             StatusCode::INTERNAL_SERVER_ERROR,
             format!("Failed to create vault: {}", e),
@@ -77,7 +78,6 @@ pub async fn create_async(
 // -------------------------------------------------
 // UPDATE
 // -------------------------------------------------
-// Make sure to import Path and Json
 
 pub async fn update_async(
     // 1. Path must be FIRST (non-body extractor)
@@ -125,4 +125,40 @@ pub async fn update_async(
 
     // 5. Return result
     (StatusCode::OK, Json(json!({ "data": updated }))).into_response()
+}
+
+// -------------------------------------------------
+// DELETE
+// -------------------------------------------------
+
+pub async fn delete_async(Path(id): Path<Uuid>) -> impl IntoResponse {
+    let db = get_db();
+
+    // 1. Try to find the existing record
+    let existing = match Vault::find_by_id(id).one(db).await {
+        Ok(Some(v)) => v,
+        Ok(None) => {
+            return (StatusCode::NOT_FOUND, "Vault not found").into_response();
+        }
+        Err(e) => {
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                format!("Database error: {}", e),
+            )
+                .into_response();
+        }
+    };
+
+    // 2. Convert Model → ActiveModel
+    let active_model: vault::ActiveModel = existing.into();
+
+    // 3. Delete record
+    match active_model.delete(db).await {
+        Ok(_) => (StatusCode::OK, "Vault deleted successfully").into_response(),
+        Err(e) => (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            format!("Failed to delete vault: {}", e),
+        )
+            .into_response(),
+    }
 }
