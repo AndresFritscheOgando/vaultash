@@ -8,6 +8,7 @@ use crate::models::entities::service;
 pub struct Model {
 #[sea_orm(primary_key)]
     pub id: Uuid,
+    #[sea_orm(has_many)]
     pub service_name: String,
     pub service_user_name: String,
     pub service_password: String,
