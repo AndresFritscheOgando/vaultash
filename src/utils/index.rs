@@ -15,6 +15,5 @@ pub async fn generate_password() -> Json<serde_json::Value> {
     };
 
     let password = pg.generate_one().unwrap();
-
     Json(json!({ "password": password }))
 }

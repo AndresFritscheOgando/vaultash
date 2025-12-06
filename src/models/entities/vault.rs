@@ -6,7 +6,7 @@ use crate::models::entities::service;
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Serialize, Deserialize)]
 #[sea_orm(table_name = "vault")]
 pub struct Model {
-    #[sea_orm(primary_key)]
+#[sea_orm(primary_key)]
     pub id: Uuid,
     pub service_name: String,
     pub service_user_name: String,
