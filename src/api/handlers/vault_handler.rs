@@ -36,6 +36,51 @@ pub async fn get_all_async() -> impl IntoResponse {
 }
 
 
+// -------------------------------------------------
+// GET Get by Id
+// -------------------------------------------------
+
+
+pub async fn get_by_id_async(
+    Path(id): Path<Uuid>
+) -> impl IntoResponse {
+    
+    let db = get_db();
+
+    let vault_model = match Vault::find_by_id(id).one(db).await {
+        
+        Ok(Some(v)) => v,
+
+        Ok(None) => {
+            return (
+                StatusCode::NOT_FOUND,
+                Json(json!({
+                    "success": false, 
+                    "error": "Vault not found" 
+                })),
+            ).into_response();
+        }
+
+        Err(e) => {
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+
+                Json(json!({
+                    "success": false, 
+                    "error": format!("Database error: {}", e) 
+                })),
+            ).into_response();
+        }
+    };
+    (
+        StatusCode::OK, 
+        Json(json!({ 
+            "success": true, 
+            "data": vault_model 
+        }))
+    ).into_response()
+}
+
 
 // -------------------------------------------------
 // CREATE
@@ -43,7 +88,7 @@ pub async fn get_all_async() -> impl IntoResponse {
 pub async fn create_async(
     Json(input): Json<VaultInputDto>,
 ) -> impl IntoResponse {
-    let db = get_db();
+    
 
     // Generate password
     let password_json = generate_password().await;
@@ -63,7 +108,7 @@ pub async fn create_async(
     };
 
     // Insert
-    match new_vault.insert(db).await {
+    match new_vault.insert(get_db()).await {
         Ok(vault) => (StatusCode::CREATED, Json(json!({ "data": vault }))).into_response(),
         Err(e) => (
             StatusCode::INTERNAL_SERVER_ERROR,
@@ -72,9 +117,6 @@ pub async fn create_async(
             .into_response(),
     }
 }
-
-
-
 // -------------------------------------------------
 // UPDATE
 // -------------------------------------------------
