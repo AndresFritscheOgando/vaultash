@@ -1,5 +1,5 @@
 use sea_orm::entity::prelude::*;
-use chrono::{DateTime, Utc}; // 💥 FIX 1: Explicitly import the generic DateTime and Utc
+use chrono::{DateTime, Utc};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel)]
 #[sea_orm(table_name = "services")]
@@ -9,9 +9,7 @@ pub struct Model {
     pub vault_id: String,
     pub image_url: String,
     pub name: String,
-
     pub created_at: DateTime<Utc>, 
-
     pub updated_at: DateTime<Utc>,
 }
 
