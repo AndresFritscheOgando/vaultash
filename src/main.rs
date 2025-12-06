@@ -1,5 +1,5 @@
 use crate::api::get_all_async;
-use crate::api::handlers::vault_handler::delete_async;
+use crate::api::handlers::vault_handler::{delete_async, get_by_id_async};
 use crate::utils::index::generate_password;
 use crate::{
     api::handlers::vault_handler::{create_async, update_async},
@@ -37,7 +37,7 @@ pub async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .route("/api/admin/vaults", 
         get(get_all_async).post(create_async))
         .route("/api/admin/vaults/{id}",
-         put(update_async).delete(delete_async)
+         put(update_async).get(get_by_id_async).delete(delete_async)
         );
 
     // 4. Start the Server
