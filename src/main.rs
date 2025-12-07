@@ -1,6 +1,6 @@
 use crate::api::get_all_async;
 use crate::api::handlers::vault_handler::{delete_async, get_by_id_async};
-use crate::utils::index::generate_password;
+use crate::utils::index::{cors_layer, generate_password};
 use crate::{
     api::handlers::vault_handler::{create_async, update_async},
     db::conn::{get_db, init_db}
@@ -38,7 +38,7 @@ pub async fn main() -> Result<(), Box<dyn std::error::Error>> {
         get(get_all_async).post(create_async))
         .route("/api/admin/vaults/{id}",
          put(update_async).get(get_by_id_async).delete(delete_async)
-        );
+        ).layer(cors_layer());
 
     // 4. Start the Server
     let listener: TcpListener = TcpListener::bind("0.0.0.0:5000").await?;
