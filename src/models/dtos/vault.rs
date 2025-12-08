@@ -8,6 +8,7 @@ use crate::models::entities::vault::Model;
 pub struct VaultInputDto {
     pub service_name: String,
     pub service_user_name: String,
+    pub service_email: String,
 }
 
 // Output to client (GET response)
@@ -17,6 +18,7 @@ pub struct VaultOutputDto {
     pub service_name: String, 
     pub service_user_name: String,
     pub service_password: String,
+    pub service_email: String,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }
@@ -25,7 +27,8 @@ impl From<Model> for VaultInputDto {
     fn from(model: Model) -> Self {
         Self {
             service_name: model.service_name,
-            service_user_name: model.service_user_name
+            service_user_name: model.service_user_name,
+            service_email: model.service_email,
         }
     }
 }
@@ -37,6 +40,7 @@ impl From<Model> for VaultOutputDto {
             service_name: model.service_name,
             service_user_name: model.service_user_name,
             service_password: model.service_password,
+            service_email: model.service_email,
             created_at: model.created_at,
             updated_at: model.updated_at,
         }
