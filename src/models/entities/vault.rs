@@ -12,6 +12,7 @@ pub struct Model {
     pub service_name: String,
     pub service_user_name: String,
     pub service_password: String,
+    pub service_email: String,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }

@@ -102,6 +102,7 @@ pub async fn create_async(
         id: Set(Uuid::new_v4()),
         service_name: Set(input.service_name),
         service_password: Set(password),
+        service_email: Set(input.service_email),
         service_user_name: Set(input.service_user_name),
         created_at: Set(Utc::now()),
         updated_at: Set(Utc::now()),
@@ -152,6 +153,7 @@ pub async fn update_async(
     // 3. Update fields (using 'model_data' from the body)
     active.service_name = Set(model_data.service_name.clone());
     active.service_user_name = Set(model_data.service_user_name.clone());
+    active.service_email = Set(model_data.service_email.clone());
     active.updated_at = Set(Utc::now());
 
     // 4. Save

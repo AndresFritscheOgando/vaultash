@@ -21,6 +21,7 @@ impl MigrationTrait for Migration {
                     .col(string(Vault::ServiceName).not_null())
                     .col(string(Vault::ServiceUserName).not_null())
                     .col(string(Vault::ServicePassword).not_null())
+                    .col(string(Vault::ServiceEmail).not_null())
                     .col(
                         ColumnDef::new(Vault::CreatedAt)
                             .timestamp_with_time_zone()
@@ -56,6 +57,7 @@ pub enum Vault {
     ServiceName,
     ServiceUserName,
     ServicePassword,
+    ServiceEmail,
     CreatedAt,
     UpdatedAt,
 }

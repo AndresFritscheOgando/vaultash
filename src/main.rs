@@ -37,8 +37,9 @@ pub async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .route("/api/admin/vaults", 
         get(get_all_async).post(create_async))
         .route("/api/admin/vaults/{id}",
-         put(update_async).get(get_by_id_async).delete(delete_async)
-        ).layer(cors_layer());
+        put(update_async).get(get_by_id_async).delete(delete_async)
+        )
+        .layer(cors_layer());
 
     // 4. Start the Server
     let listener: TcpListener = TcpListener::bind("0.0.0.0:5000").await?;
