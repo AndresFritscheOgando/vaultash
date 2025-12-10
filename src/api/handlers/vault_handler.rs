@@ -1,6 +1,6 @@
 use crate::models::entities::vault::{self, Entity as Vault};
 use crate::models::dtos::vault::VaultInputDto;
-use crate::utils::multipart::upload;
+use crate::utils::multipart::upload_async;
 use crate::db::conn::get_db;
 use axum::extract::Path;
 use chrono::Utc;

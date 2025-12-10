@@ -1,4 +1,4 @@
-use crate::utils::multipart::upload;
+use crate::utils::multipart::upload_async;
 use crate::models::entities::service;
 use crate::models::entities::service::Entity as Service;
 use crate::models::dtos::service::ServiceDto;
