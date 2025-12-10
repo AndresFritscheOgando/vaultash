@@ -27,7 +27,7 @@ pub async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let app = Router::new()
         .merge(api::routes::create_routes())
         .layer(cors_layer());
-
+    
     // 4. Start the Server
     let listener: TcpListener = TcpListener::bind("0.0.0.0:5000").await?;
     println!("Web server listening on http://localhost:5000");
