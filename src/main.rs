@@ -1,16 +1,9 @@
-use crate::api::get_all_async;
-use crate::api::handlers::vault_handler::{delete_async, get_by_id_async};
+
 use crate::utils::index::{cors_layer, generate_password};
-use crate::{
-    api::handlers::vault_handler::{create_async, update_async},
-    db::conn::{get_db, init_db}
-};
-use axum::{
-    Router,
-    routing::{get, put},
-};
+use crate::db::conn::{get_db, init_db};
 use migration::{Migrator, MigratorTrait};
 use tokio::net::TcpListener;
+use axum::Router;
 
 mod api;
 mod db;
@@ -32,13 +25,7 @@ pub async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // 3. Web Server Setup
     let app = Router::new()
-        .route("/generate-password", 
-        get(generate_password))
-        .route("/api/admin/vaults", 
-        get(get_all_async).post(create_async))
-        .route("/api/admin/vaults/{id}",
-        put(update_async).get(get_by_id_async).delete(delete_async)
-        )
+        .merge(api::routes::create_routes())
         .layer(cors_layer());
 
     // 4. Start the Server

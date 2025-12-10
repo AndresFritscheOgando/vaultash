@@ -1,25 +1,17 @@
-use crate::db::init_db;
 use crate::models::entities::vault::{self, Entity as Vault};
 use crate::models::dtos::vault::VaultInputDto;
-
+use crate::utils::multipart::upload;
 use crate::db::conn::get_db;
 use axum::extract::Path;
 use chrono::Utc;
-
 use axum::{
     response::{IntoResponse, Json},
     http::StatusCode,
 };
-
 use sea_orm::{ActiveModelTrait, EntityTrait, Set};
-
-
 use uuid::Uuid;
 use serde_json::json;
-
 use crate::utils::index::generate_password;
-
-
 
 // -------------------------------------------------
 // GET ALL
@@ -39,8 +31,6 @@ pub async fn get_all_async() -> impl IntoResponse {
 // -------------------------------------------------
 // GET Get by Id
 // -------------------------------------------------
-
-
 pub async fn get_by_id_async(
     Path(id): Path<Uuid>
 ) -> impl IntoResponse {
@@ -85,8 +75,9 @@ pub async fn get_by_id_async(
 // -------------------------------------------------
 // CREATE
 // -------------------------------------------------
-pub async fn create_async(
+    pub async fn create_async(
     Json(input): Json<VaultInputDto>,
+    
 ) -> impl IntoResponse {
     
 
@@ -108,7 +99,6 @@ pub async fn create_async(
         updated_at: Set(Utc::now()),
     };
 
-    // Insert
     match new_vault.insert(get_db()).await {
         Ok(vault) => (StatusCode::CREATED, Json(json!({ "data": vault }))).into_response(),
         Err(e) => (
@@ -121,16 +111,12 @@ pub async fn create_async(
 // -------------------------------------------------
 // UPDATE
 // -------------------------------------------------
-
 pub async fn update_async(
-    // 1. Path must be FIRST (non-body extractor)
     Path(id): Path<Uuid>, 
-    // 2. Json must be LAST (body extractor)
-    Json(model_data): Json<VaultInputDto>, // <-- Using the DTO
+    Json(model_data): Json<VaultInputDto>, 
 ) -> impl IntoResponse {
     let db = get_db();
 
-    // 1. Find existing vault (using 'id' from the path)
     let existing = match Vault::find_by_id(id).one(db).await {
         Ok(Some(v)) => v,
         Ok(None) => {
@@ -147,16 +133,13 @@ pub async fn update_async(
         }
     };
 
-    // 2. Convert Model -> ActiveModel
     let mut active: vault::ActiveModel = existing.into();
 
-    // 3. Update fields (using 'model_data' from the body)
     active.service_name = Set(model_data.service_name.clone());
     active.service_user_name = Set(model_data.service_user_name.clone());
     active.service_email = Set(model_data.service_email.clone());
     active.updated_at = Set(Utc::now());
 
-    // 4. Save
     let updated = match active.update(db).await {
         Ok(v) => v,
         Err(e) => {
@@ -167,18 +150,15 @@ pub async fn update_async(
         }
     };
 
-    // 5. Return result
     (StatusCode::OK, Json(json!({ "data": updated }))).into_response()
 }
 
 // -------------------------------------------------
 // DELETE
 // -------------------------------------------------
-
 pub async fn delete_async(Path(id): Path<Uuid>) -> impl IntoResponse {
     let db = get_db();
 
-    // 1. Try to find the existing record
     let existing = match Vault::find_by_id(id).one(db).await {
         Ok(Some(v)) => v,
         Ok(None) => {
@@ -193,10 +173,9 @@ pub async fn delete_async(Path(id): Path<Uuid>) -> impl IntoResponse {
         }
     };
 
-    // 2. Convert Model → ActiveModel
+
     let active_model: vault::ActiveModel = existing.into();
 
-    // 3. Delete record
     match active_model.delete(db).await {
         Ok(_) => (StatusCode::OK, "Vault deleted successfully").into_response(),
         Err(e) => (
