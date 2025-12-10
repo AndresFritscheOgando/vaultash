@@ -24,9 +24,10 @@ pub fn cors_layer() -> CorsLayer {
         // Allow requests from any origin (not recommended for production)
         // .allow_origin(Any) 
 
-        // OR, specify allowed origins for better security
+        // Specify allowed origins for development
         .allow_origin([
             "http://localhost:3000".parse().unwrap(),
+            "http://localhost:3001".parse().unwrap(),
         ])
         // Allow specific headers like Authorization and Content-Type
         .allow_headers(Any)
