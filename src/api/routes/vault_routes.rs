@@ -10,7 +10,7 @@ pub fn routes() -> Router {
         .route("/generate-password", get(generate_password))
         .route("/api/admin/vaults", get(get_all_async).post(create_async))
         .route(
-            "/api/admin/vaults/:id",
+            "/api/admin/vaults/{id}",
             get(get_by_id_async).put(update_async).delete(delete_async),
         )
 }
