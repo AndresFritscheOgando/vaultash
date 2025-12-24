@@ -1,8 +1,6 @@
 use s3_simple::*;
 use std::path::Path;
-use mime::Mime;
 use uuid::Uuid;
-use std::str::FromStr;
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -12,9 +10,6 @@ pub enum ImageUploadError {
     
     #[error("Invalid image format. Only .jpg, .jpeg, .png, .gif are allowed")]
     InvalidFormat,
-    
-    #[error("Failed to determine content type")]
-    ContentTypeError,
     
     #[error("S3 error: {0}")]
     S3Error(#[from] S3Error),
@@ -59,11 +54,6 @@ pub async fn upload_image_file(
     if !allowed_extensions.contains(&extension.as_str()) {
         return Err(ImageUploadError::InvalidFormat);
     }
-
-    // Determine content type
-    let mime_type = mime_guess::from_path(file_name)
-        .first()
-        .ok_or(ImageUploadError::ContentTypeError)?;
 
     // Generate unique filename
     let unique_filename = format!(

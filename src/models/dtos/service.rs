@@ -1,6 +1,5 @@
 use axum::{
     body::Bytes,
-    extract::multipart::Field,
 };
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
@@ -13,8 +12,6 @@ use crate::models::{entities::service::Model};
 pub enum ServiceRequestError {
     #[error("Missing field: {0}")]
     MissingField(String),
-    #[error("Invalid field format: {0}")]
-    InvalidFormat(String),
     #[error("Multipart error: {0}")]
     MultipartError(#[from] axum::extract::multipart::MultipartError),
 }
