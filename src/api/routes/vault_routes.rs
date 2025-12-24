@@ -1,5 +1,9 @@
 use crate::api::handlers::vault_handler::{
-    create_async, delete_async, get_all_async, get_by_id_async, update_async,
+    create_async, 
+    delete_async, 
+    get_all_async, 
+    get_by_id_async, 
+    update_async,
 };
 use crate::generate_password;
 use axum::{Router, routing::get};

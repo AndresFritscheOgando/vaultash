@@ -22,12 +22,12 @@ pub async fn generate_password() -> Json<serde_json::Value> {
 pub fn cors_layer() -> CorsLayer {
     let cors = CorsLayer::new()
         // Allow requests from any origin (not recommended for production)
-        // .allow_origin(Any) 
-
-        // Specify allowed origins for development
+        .allow_origin(Any)
+        // Uncomment and modify the following to allow specific origins in production:
         .allow_origin([
-            "http://localhost:3000".parse().unwrap(),
-            "http://localhost:3001".parse().unwrap(),
+            // "http://localhost:3000".parse().unwrap(),
+            // "http://localhost:3001".parse().unwrap(),
+            "https://v0-password-manager-ui-sigma.vercel.app".parse().unwrap(),
         ])
         // Allow specific headers like Authorization and Content-Type
         .allow_headers(Any)
