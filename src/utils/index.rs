@@ -25,7 +25,7 @@ pub fn cors_layer() -> CorsLayer {
         .allow_origin(Any)
         // Uncomment and modify the following to allow specific origins in production:
         .allow_origin([
-            // "http://localhost:3000".parse().unwrap(),
+            "http://localhost:3000".parse().unwrap(),
             // "http://localhost:3001".parse().unwrap(),
             "https://v0-password-manager-ui-sigma.vercel.app".parse().unwrap(),
         ])

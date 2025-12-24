@@ -11,7 +11,7 @@ use axum::{Router, routing::get};
 pub fn routes() -> Router {
     Router::new()
         .route("/", get(|| async { "Hello World" })) // inline async handler
-        .route("/generate-password", get(generate_password))
+        .route("/api/generate-password", get(generate_password))
         .route("/api/admin/vaults", get(get_all_async).post(create_async))
         .route(
             "/api/admin/vaults/{id}",
